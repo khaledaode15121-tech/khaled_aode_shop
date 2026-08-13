@@ -182,11 +182,15 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
   return (
     <header
       className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/95 backdrop-blur-xl shadow-lg shadow-blue-900/5"
-          : "bg-transparent"
+        "bg-white/95 backdrop-blur-xl shadow-lg shadow-blue-900/5"
       }`}
     >
+      <div className="hidden bg-blue-600 text-white md:block">
+        <div className="container flex items-center justify-between py-2 text-xs" style={{ fontFamily: "'Cairo', sans-serif" }}>
+          <span>متجر أبو علي للاتصالات — تسوق بثقة</span>
+          <div className="flex items-center gap-5"><span>واتساب: 050 000 0000</span><span>الدعم متاح يومياً</span></div>
+        </div>
+      </div>
       <div className="container">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
@@ -197,13 +201,13 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
             <div className="leading-tight">
               <div
                 className={`font-bold text-base md:text-lg leading-none font-cairo transition-colors ${
-                  scrolled ? "text-gray-900" : "text-white"
+                  "text-gray-900"
                 }`}
                 style={{ fontFamily: "'Cairo', sans-serif" }}
               >
                 أبو علي للاتصالات
               </div>
-              <div className={`text-xs transition-colors ${scrolled ? "text-blue-600" : "text-blue-300"}`}>
+              <div className={`text-xs transition-colors ${"text-blue-600"}`}>
                 وجهتك الأولى للتقنية
               </div>
             </div>
@@ -216,7 +220,7 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
                 key={link.href}
                 href={link.href}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-blue-600/10 hover:text-blue-600 ${
-                  scrolled ? "text-gray-700" : "text-white/90 hover:text-white"
+                  "text-gray-700 hover:text-blue-600"
                 }`}
                 style={{ fontFamily: "'Cairo', sans-serif" }}
               >
@@ -227,7 +231,7 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
               <DropdownMenuTrigger asChild>
                 <button
                   className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all hover:bg-blue-600/10 hover:text-blue-600 ${
-                    scrolled ? "text-gray-700" : "text-white/90 hover:text-white"
+                    "text-gray-700 hover:text-blue-600"
                   }`}
                   style={{ fontFamily: "'Cairo', sans-serif" }}
                 >
@@ -255,7 +259,7 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
             <a
               href="tel:+966500000000"
               className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                scrolled ? "text-gray-700 hover:text-blue-600" : "text-white/80 hover:text-white"
+                "text-gray-700 hover:text-blue-600"
               }`}
             >
               <Phone className="w-4 h-4" />
@@ -267,9 +271,7 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
                   <DropdownMenuTrigger asChild>
                     <button
                       className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all focus:outline-none ${
-                        scrolled
-                          ? "bg-blue-50 text-blue-700 hover:bg-blue-100"
-                          : "bg-white/20 text-white hover:bg-white/30"
+"bg-blue-50 text-blue-700 hover:bg-blue-100"
                       }`}
                       style={{ fontFamily: "'Cairo', sans-serif" }}
                     >
@@ -327,7 +329,7 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
           {/* Mobile Menu Toggle */}
           <button
             className={`md:hidden p-2 rounded-lg transition-colors ${
-              scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-white/10"
+              "text-gray-700 hover:bg-gray-100"
             }`}
             onClick={() => setMenuOpen(!menuOpen)}
           >
@@ -733,7 +735,7 @@ function ProductsSection({ selectedCategory, searchQuery }: { selectedCategory?:
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {((productsLoading ? Array.from({ length: 6 }) : filteredProducts) as any[]).map((product: any, i: number) => {
             const isPlaceholder = productsLoading;
             const ratingValue = isPlaceholder ? 0 : Math.floor(Number(product.rating) || 0);
