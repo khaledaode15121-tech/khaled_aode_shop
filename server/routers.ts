@@ -123,6 +123,7 @@ export const appRouter = router({
       }))
       .query(({ input }) => db.searchProducts(input)),
     categories: publicProcedure.query(() => db.getCategories()),
+    brands: publicProcedure.query(() => db.getBrands()),
   }),
 
   cart: router({

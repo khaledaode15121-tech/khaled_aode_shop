@@ -773,12 +773,18 @@ export async function deleteCategoryAdmin(id: number) {
   return true;
 }
 
+export async function getBrands() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(brandTable).where(eq(brandTable.isActive, true)).orderBy(desc(brandTable.id));
+}
+
 export async function getAllBrands() {
   const db = await getDb();
   if (!db) return [];
-
   return db.select().from(brandTable).orderBy(desc(brandTable.id));
 }
+
 
 export async function createBrandAdmin(data: { name: string; slug?: string; description?: string; logo?: string; isActive?: boolean }) {
   const db = await getDb();

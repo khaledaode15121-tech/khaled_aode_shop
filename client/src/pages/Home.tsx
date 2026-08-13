@@ -71,6 +71,8 @@ import {
   LogOut,
   User,
   ChevronDown,
+  Search,
+  Grid2X2,
 } from "lucide-react";
 
 // ─── Image URLs ───────────────────────────────────────────────────────────────
@@ -128,7 +130,6 @@ const features = [
 
 const paymentMethods = ["Visa", "Mastercard", "Apple Pay", "Google Pay", "مدى", "الدفع عند الاستلام", "تحويل بنكي"];
 
-const brands = ["Apple", "Samsung", "Huawei", "Xiaomi", "OnePlus", "Sony", "LG", "Lenovo", "HP", "Dell", "Asus", "Oppo"];
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
@@ -446,6 +447,89 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
   );
 }
 
+function CatalogHero({
+  selectedCategory,
+  onCategoryChange,
+  onSearch,
+}: {
+  selectedCategory?: string;
+  onCategoryChange: (value: string | undefined) => void;
+  onSearch: (value: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const { data: categories = [] } = trpc.products.categories.useQuery();
+  const { data: brands = [] } = trpc.products.brands.useQuery();
+
+  const submitSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    onSearch(query.trim());
+    document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <section id="hero" className="bg-white pt-24 md:pt-28 pb-10">
+      <div className="container">
+        <div className="flex flex-col gap-5 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm md:p-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+            <form onSubmit={submitSearch} className="flex min-h-14 flex-1 items-center overflow-hidden rounded-2xl border-2 border-gray-200 bg-white focus-within:border-blue-600">
+              <Search className="mx-4 h-5 w-5 shrink-0 text-blue-600" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="ابحث عن منتج أو برند..."
+                className="h-full min-w-0 flex-1 bg-transparent px-1 text-right text-sm text-gray-800 outline-none"
+                style={{ fontFamily: "'Cairo', sans-serif" }}
+              />
+              <button type="submit" className="h-full bg-blue-600 px-6 font-bold text-white transition hover:bg-blue-700" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                بحث
+              </button>
+            </form>
+            <div className="flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-white lg:min-w-56">
+              <Grid2X2 className="h-5 w-5" />
+              <span className="font-bold" style={{ fontFamily: "'Cairo', sans-serif" }}>تصفح المتجر</span>
+            </div>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
+            <aside className="order-2 overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 lg:order-1">
+              <div className="bg-blue-600 px-5 py-4 text-center font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>البرندات</div>
+              <div className="max-h-64 overflow-y-auto p-2">
+                <button onClick={() => onSearch("")} className="w-full rounded-xl px-3 py-2 text-right text-sm font-semibold text-gray-700 transition hover:bg-blue-50 hover:text-blue-600" style={{ fontFamily: "'Cairo', sans-serif" }}>كل البرندات</button>
+                {brands.map((brand) => (
+                  <button key={brand.id} onClick={() => onSearch(brand.name)} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-right text-sm text-gray-600 transition hover:bg-blue-50 hover:text-blue-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    {brand.logo ? <img src={brand.logo} alt="" className="h-6 w-6 rounded object-contain" /> : <span className="h-2 w-2 rounded-full bg-orange-500" />}
+                    <span>{brand.name}</span>
+                  </button>
+                ))}
+              </div>
+            </aside>
+
+            <div className="order-1 grid min-h-[290px] gap-3 sm:grid-cols-2 lg:order-2 lg:grid-cols-[1.15fr_.85fr]">
+              <div className="relative overflow-hidden rounded-3xl bg-[#0D1B2A] p-7 text-white sm:col-span-2 lg:col-span-1">
+                <img src={HERO_IMG} alt="أحدث المنتجات" className="absolute inset-0 h-full w-full object-cover opacity-35" />
+                <div className="absolute inset-0 bg-gradient-to-l from-[#0D1B2A]/20 to-[#0D1B2A]/95" />
+                <div className="relative z-10 flex h-full max-w-md flex-col justify-center">
+                  <span className="mb-3 text-sm font-semibold text-orange-300" style={{ fontFamily: "'Cairo', sans-serif" }}>عروض وتقنيات جديدة</span>
+                  <h1 className="text-3xl font-black leading-tight md:text-4xl" style={{ fontFamily: "'Cairo', sans-serif" }}>كل ما تحتاجه<br /><span className="text-blue-300">في مكان واحد</span></h1>
+                  <p className="mt-3 text-sm leading-7 text-gray-200" style={{ fontFamily: "'Tajawal', sans-serif" }}>اكتشف المنتجات والبرندات والفئات المتوفرة في متجرنا.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {categories.slice(0, 4).map((category, index) => (
+                  <button key={category} onClick={() => { onCategoryChange(category); document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }); }} className={`group relative overflow-hidden rounded-2xl border border-gray-100 p-4 text-right ${index % 2 ? "bg-blue-50" : "bg-orange-50"}`}>
+                    <div className="absolute -bottom-5 -left-5 h-20 w-20 rounded-full bg-white/50 transition group-hover:scale-125" />
+                    <div className="relative z-10 flex h-full flex-col justify-end"><span className="text-xs text-gray-500" style={{ fontFamily: "'Tajawal', sans-serif" }}>تصفح الآن</span><span className="mt-1 font-bold text-gray-900" style={{ fontFamily: "'Cairo', sans-serif" }}>{category}</span></div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HeroSection() {
   return (
     <section
@@ -547,7 +631,7 @@ function HeroSection() {
 }
 
 function BrandsMarquee() {
-  const categories = ["إكسسوارات موبايلات", "هدايا", "مستلزمات أعراس", "أجهزة إلكترونية", "ملحقات منزلية"];
+  const { data: categories = [] } = trpc.products.categories.useQuery();
 
   return (
     <section className="bg-white border-y border-gray-100 py-5 overflow-hidden">
@@ -573,12 +657,16 @@ function BrandsMarquee() {
   );
 }
 
-function ProductsSection({ selectedCategory }: { selectedCategory?: string }) {
+function ProductsSection({ selectedCategory, searchQuery }: { selectedCategory?: string; searchQuery: string }) {
   const [activeFilter, setActiveFilter] = useState("الكل");
   const [, navigate] = useLocation();
   const { user } = useAuth();
-  const { data: products = [], isLoading: productsLoading } = trpc.products.list.useQuery();
-  const filters = ["الكل", "Apple", "Samsung", "عروض"];
+  const searchResult = trpc.products.search.useQuery({ query: searchQuery || undefined, limit: 24 });
+  const productList = trpc.products.list.useQuery(undefined, { enabled: !searchQuery });
+  const products = searchQuery ? (searchResult.data ?? []) : (productList.data ?? []);
+  const productsLoading = searchQuery ? searchResult.isLoading : productList.isLoading;
+  const { data: brands = [] } = trpc.products.brands.useQuery();
+  const filters = ["الكل", ...brands.map((brand) => brand.name), "عروض"];
 
   const filteredProducts = useMemo(() => {
     let result = products;
@@ -1296,13 +1384,14 @@ function WhatsAppButton() {
 export default function Home() {
   useScrollReveal();
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <div className="min-h-screen" dir="rtl">
       <Navbar selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
-      <HeroSection />
+      <CatalogHero selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} onSearch={setSearchQuery} />
       <BrandsMarquee />
-      <ProductsSection selectedCategory={selectedCategory} />
+      <ProductsSection selectedCategory={selectedCategory} searchQuery={searchQuery} />
       <OffersSection />
       <FeaturesSection />
       <PaymentSection />
