@@ -1,5 +1,7 @@
 const fallbackCookieSecret = "development-cookie-secret";
 
+import "dotenv/config";
+
 export const ENV = {
   appId: process.env.VITE_APP_ID ?? "",
   cookieSecret: process.env.JWT_SECRET?.trim() || process.env.COOKIE_SECRET?.trim() || fallbackCookieSecret,
