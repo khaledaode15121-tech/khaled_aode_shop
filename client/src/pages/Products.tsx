@@ -19,11 +19,13 @@ export default function Products() {
   const [maxPrice, setMaxPrice] = useState<number | undefined>();
   const [minRating, setMinRating] = useState<number | undefined>();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const { addProduct, isInComparison } = useComparison();
 
-  // Fetch categories
+  // Fetch categories and brands
   const { data: categories = [] } = trpc.products.categories.useQuery();
+  const { data: brands = [] } = trpc.products.brands.useQuery();
 
   // Search and filter products
   const { data: searchResults = [], isLoading } = trpc.products.search.useQuery({
@@ -32,6 +34,7 @@ export default function Products() {
     maxPrice,
     minRating,
     categories: selectedCategories.length > 0 ? selectedCategories : (undefined as any),
+    brands: selectedBrands.length > 0 ? selectedBrands : (undefined as any),
     limit: 50,
   });
 
@@ -44,6 +47,12 @@ export default function Products() {
     );
   };
 
+  const toggleBrand = (brand: string) => {
+    setSelectedBrands((prev) =>
+      prev.includes(brand) ? prev.filter((item) => item !== brand) : [...prev, brand]
+    );
+  };
+
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery("");
@@ -51,6 +60,7 @@ export default function Products() {
     setMaxPrice(undefined);
     setMinRating(undefined);
     setSelectedCategories([]);
+    setSelectedBrands([]);
   };
 
   // Check if any filters are active
@@ -59,7 +69,8 @@ export default function Products() {
     minPrice !== undefined ||
     maxPrice !== undefined ||
     minRating !== undefined ||
-    selectedCategories.length > 0;
+    selectedCategories.length > 0 ||
+    selectedBrands.length > 0;
 
   return (
     <div className="min-h-screen bg-[#F4F6FA]" dir="rtl">
@@ -173,6 +184,33 @@ export default function Products() {
                 </div>
               </div>
 
+              {/* Brands */}
+              <div className="mb-6 pb-6 border-b border-gray-100">
+                <h3 className="font-semibold text-gray-800 mb-4 text-sm" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  البرندات
+                </h3>
+                <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                  {brands.map((brand) => (
+                    <button
+                      key={brand.id}
+                      onClick={() => toggleBrand(brand.name)}
+                      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-right text-sm transition-colors ${
+                        selectedBrands.includes(brand.name)
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                      }`}
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
+                      <span className="flex min-w-0 items-center gap-2">
+                        {brand.logo ? <img src={brand.logo} alt="" className="h-5 w-5 rounded object-contain" /> : <span className="h-2 w-2 rounded-full bg-orange-500" />}
+                        <span className="truncate">{brand.name}</span>
+                      </span>
+                      {selectedBrands.includes(brand.name) && <span className="text-xs">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Categories */}
               <div>
                 <h3 className="font-semibold text-gray-800 mb-4 text-sm" style={{ fontFamily: "'Cairo', sans-serif" }}>
@@ -221,10 +259,15 @@ export default function Products() {
             </div>
 
             {/* Results Count */}
-            <div className="mb-6">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <p className="text-gray-600 text-sm" style={{ fontFamily: "'Tajawal', sans-serif" }}>
                 {isLoading ? "جاري البحث..." : `تم العثور على ${searchResults.length} منتج`}
               </p>
+              {hasActiveFilters && !isLoading && (
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  {selectedBrands.length > 0 ? `${selectedBrands.length} براند محدد` : "فلاتر مفعّلة"}
+                </span>
+              )}
             </div>
 
             {/* Products Grid */}

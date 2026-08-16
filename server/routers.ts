@@ -119,6 +119,7 @@ export const appRouter = router({
         maxPrice: z.number().optional(),
         minRating: z.number().optional(),
         categories: z.array(z.string()).optional(),
+        brands: z.array(z.string()).optional(),
         limit: z.number().default(20),
       }))
       .query(({ input }) => db.searchProducts(input)),

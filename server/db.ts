@@ -831,6 +831,7 @@ export async function searchProducts(filters: {
   maxPrice?: number;
   minRating?: number;
   categories?: string[];
+  brands?: string[];
   limit?: number;
 }): Promise<Product[]> {
   const db = await getDb();
@@ -870,6 +871,11 @@ export async function searchProducts(filters: {
   // Category filter
   if (filters.categories && filters.categories.length > 0) {
     results = results.filter(p => filters.categories!.includes(p.category));
+  }
+
+  // Brand filter
+  if (filters.brands && filters.brands.length > 0) {
+    results = results.filter(p => filters.brands!.includes(p.brand));
   }
 
   // Limit results
