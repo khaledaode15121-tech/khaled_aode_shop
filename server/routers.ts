@@ -120,11 +120,15 @@ export const appRouter = router({
         minRating: z.number().optional(),
         categories: z.array(z.string()).optional(),
         brands: z.array(z.string()).optional(),
+        colors: z.array(z.string()).optional(),
+        sizes: z.array(z.string()).optional(),
         limit: z.number().default(20),
       }))
       .query(({ input }) => db.searchProducts(input)),
     categories: publicProcedure.query(() => db.getCategories()),
     brands: publicProcedure.query(() => db.getBrands()),
+    colors: publicProcedure.query(() => db.getProductColors()),
+    sizes: publicProcedure.query(() => db.getProductSizes()),
   }),
 
   cart: router({
@@ -282,6 +286,8 @@ export const appRouter = router({
           stock: z.number().default(0),
           badge: z.string().optional(),
           badgeColor: z.string().optional(),
+          color: z.string().optional(),
+          size: z.string().optional(),
         }))
         .mutation(({ input }) => db.createProductAdmin(input)),
       update: publicProcedure
@@ -298,6 +304,9 @@ export const appRouter = router({
           stock: z.number().optional(),
           image: z.string().optional(),
           badge: z.string().optional(),
+          badgeColor: z.string().optional(),
+          color: z.string().optional(),
+          size: z.string().optional(),
         }))
         .mutation(({ input }) => db.updateProductAdmin(input.id, input)),
       delete: publicProcedure

@@ -779,6 +779,20 @@ export async function getBrands() {
   return db.select().from(brandTable).where(eq(brandTable.isActive, true)).orderBy(desc(brandTable.id));
 }
 
+export async function getProductColors() {
+  const db = await getDb();
+  if (!db) return [];
+  const result = await db.select({ color: products.color }).from(products);
+  return Array.from(new Set(result.map((row) => row.color).filter((value): value is string => Boolean(value?.trim()))));
+}
+
+export async function getProductSizes() {
+  const db = await getDb();
+  if (!db) return [];
+  const result = await db.select({ size: products.size }).from(products);
+  return Array.from(new Set(result.map((row) => row.size).filter((value): value is string => Boolean(value?.trim()))));
+}
+
 export async function getAllBrands() {
   const db = await getDb();
   if (!db) return [];
@@ -832,6 +846,8 @@ export async function searchProducts(filters: {
   minRating?: number;
   categories?: string[];
   brands?: string[];
+  colors?: string[];
+  sizes?: string[];
   limit?: number;
 }): Promise<Product[]> {
   const db = await getDb();
@@ -876,6 +892,14 @@ export async function searchProducts(filters: {
   // Brand filter
   if (filters.brands && filters.brands.length > 0) {
     results = results.filter(p => filters.brands!.includes(p.brand));
+  }
+
+  // Color and size filters
+  if (filters.colors && filters.colors.length > 0) {
+    results = results.filter(p => p.color ? filters.colors!.includes(p.color) : false);
+  }
+  if (filters.sizes && filters.sizes.length > 0) {
+    results = results.filter(p => p.size ? filters.sizes!.includes(p.size) : false);
   }
 
   // Limit results
@@ -954,6 +978,9 @@ export async function updateProductAdmin(id: number, data: Partial<Product> & { 
     if (data.stock !== undefined) updateData.stock = data.stock;
     if (data.image !== undefined) updateData.image = data.image;
     if (data.badge !== undefined) updateData.badge = data.badge;
+    if (data.badgeColor !== undefined) updateData.badgeColor = data.badgeColor;
+    if (data.color !== undefined) updateData.color = data.color || null;
+    if (data.size !== undefined) updateData.size = data.size || null;
     if (data.categoryId !== undefined) {
       updateData.categoryId = data.categoryId ?? null;
       if (data.categoryId) {
@@ -1040,6 +1067,8 @@ export async function createProductAdmin(data: {
   stock?: number;
   badge?: string;
   badgeColor?: string;
+  color?: string;
+  size?: string;
 }) {
   const db = await getDb();
   if (!db) {
@@ -1073,6 +1102,8 @@ export async function createProductAdmin(data: {
       stock: data.stock ?? 0,
       badge: data.badge,
       badgeColor: data.badgeColor,
+      color: data.color || null,
+      size: data.size || null,
       rating: "0",
       reviewCount: 0,
     });

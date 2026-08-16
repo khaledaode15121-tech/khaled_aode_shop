@@ -76,6 +76,8 @@ export const products = mysqlTable("products", {
   stock: int("stock").default(0),
   badge: varchar("badge", { length: 100 }),
   badgeColor: varchar("badgeColor", { length: 50 }),
+  color: varchar("color", { length: 100 }),
+  size: varchar("size", { length: 100 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

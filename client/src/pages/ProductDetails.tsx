@@ -188,6 +188,13 @@ export default function ProductDetails() {
               {product.brand}
             </p>
 
+            {(product.color || product.size) && (
+              <div className="mb-5 flex flex-wrap gap-2 text-sm" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                {product.color && <span className="rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">اللون: <strong>{product.color}</strong></span>}
+                {product.size && <span className="rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">المقاس: <strong>{product.size}</strong></span>}
+              </div>
+            )}
+
             {/* Rating */}
             <div className="flex items-center gap-4 mb-6">
               <div className="flex items-center gap-1">

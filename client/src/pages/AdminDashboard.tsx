@@ -27,6 +27,8 @@ interface ProductFormData {
   stock: number;
   badge: string;
   badgeColor: string;
+  color: string;
+  size: string;
 }
 
 interface CategoryFormData {
@@ -66,6 +68,8 @@ const emptyProductForm: ProductFormData = {
   stock: 0,
   badge: "",
   badgeColor: "bg-blue-600",
+  color: "",
+  size: "",
 };
 
 const emptyCategoryForm: CategoryFormData = {
@@ -291,6 +295,8 @@ export default function AdminDashboard() {
       stock: product.stock || 0,
       badge: product.badge || "",
       badgeColor: product.badgeColor || "bg-blue-600",
+      color: product.color || "",
+      size: product.size || "",
     });
     setIsProductDialogOpen(true);
   }
@@ -363,6 +369,9 @@ export default function AdminDashboard() {
         image: productFormData.image || undefined,
         stock: productFormData.stock,
         badge: productFormData.badge || undefined,
+        badgeColor: productFormData.badgeColor || undefined,
+        color: productFormData.color || undefined,
+        size: productFormData.size || undefined,
       });
     } else {
       createProductMutation.mutate({
@@ -378,6 +387,8 @@ export default function AdminDashboard() {
         stock: productFormData.stock,
         badge: productFormData.badge || undefined,
         badgeColor: productFormData.badgeColor || undefined,
+        color: productFormData.color || undefined,
+        size: productFormData.size || undefined,
       });
     }
   }
@@ -1211,6 +1222,17 @@ export default function AdminDashboard() {
               {productFormData.image && (
                 <img src={productFormData.image} alt="معاينة" className="w-full h-32 object-cover rounded-lg border mt-2" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
               )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="productColor">اللون (للمنتجات النسائية)</Label>
+                <Input id="productColor" placeholder="مثال: أسود، وردي، بيج" value={productFormData.color} onChange={(e) => handleProductFormChange("color", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="productSize">المقاس (للمنتجات النسائية)</Label>
+                <Input id="productSize" placeholder="مثال: S، M، L أو 38" value={productFormData.size} onChange={(e) => handleProductFormChange("size", e.target.value)} />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">

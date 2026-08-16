@@ -20,12 +20,16 @@ export default function Products() {
   const [minRating, setMinRating] = useState<number | undefined>();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const { addProduct, isInComparison } = useComparison();
 
   // Fetch categories and brands
   const { data: categories = [] } = trpc.products.categories.useQuery();
   const { data: brands = [] } = trpc.products.brands.useQuery();
+  const { data: colors = [] } = trpc.products.colors.useQuery();
+  const { data: sizes = [] } = trpc.products.sizes.useQuery();
 
   // Search and filter products
   const { data: searchResults = [], isLoading } = trpc.products.search.useQuery({
@@ -35,6 +39,8 @@ export default function Products() {
     minRating,
     categories: selectedCategories.length > 0 ? selectedCategories : (undefined as any),
     brands: selectedBrands.length > 0 ? selectedBrands : (undefined as any),
+    colors: selectedColors.length > 0 ? selectedColors : (undefined as any),
+    sizes: selectedSizes.length > 0 ? selectedSizes : (undefined as any),
     limit: 50,
   });
 
@@ -53,6 +59,10 @@ export default function Products() {
     );
   };
 
+  const toggleValue = (value: string, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+    setter((prev) => prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]);
+  };
+
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery("");
@@ -61,6 +71,8 @@ export default function Products() {
     setMinRating(undefined);
     setSelectedCategories([]);
     setSelectedBrands([]);
+    setSelectedColors([]);
+    setSelectedSizes([]);
   };
 
   // Check if any filters are active
@@ -70,7 +82,9 @@ export default function Products() {
     maxPrice !== undefined ||
     minRating !== undefined ||
     selectedCategories.length > 0 ||
-    selectedBrands.length > 0;
+    selectedBrands.length > 0 ||
+    selectedColors.length > 0 ||
+    selectedSizes.length > 0;
 
   return (
     <div className="min-h-screen bg-[#F4F6FA]" dir="rtl">
@@ -211,6 +225,44 @@ export default function Products() {
                 </div>
               </div>
 
+              {/* Colors */}
+              {colors.length > 0 && (
+                <div className="mb-6 border-b border-gray-100 pb-6">
+                  <h3 className="mb-4 text-sm font-semibold text-gray-800" style={{ fontFamily: "'Cairo', sans-serif" }}>اللون</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => toggleValue(color, setSelectedColors)}
+                        className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${selectedColors.includes(color) ? "border-blue-600 bg-blue-600 text-white" : "border-gray-200 bg-gray-50 text-gray-700 hover:border-blue-300"}`}
+                        style={{ fontFamily: "'Cairo', sans-serif" }}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sizes */}
+              {sizes.length > 0 && (
+                <div className="mb-6 border-b border-gray-100 pb-6">
+                  <h3 className="mb-4 text-sm font-semibold text-gray-800" style={{ fontFamily: "'Cairo', sans-serif" }}>المقاس</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {sizes.map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => toggleValue(size, setSelectedSizes)}
+                        className={`min-w-10 rounded-lg border px-3 py-1.5 text-xs transition-colors ${selectedSizes.includes(size) ? "border-blue-600 bg-blue-600 text-white" : "border-gray-200 bg-gray-50 text-gray-700 hover:border-blue-300"}`}
+                        style={{ fontFamily: "'Cairo', sans-serif" }}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Categories */}
               <div>
                 <h3 className="font-semibold text-gray-800 mb-4 text-sm" style={{ fontFamily: "'Cairo', sans-serif" }}>
@@ -265,7 +317,7 @@ export default function Products() {
               </p>
               {hasActiveFilters && !isLoading && (
                 <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  {selectedBrands.length > 0 ? `${selectedBrands.length} براند محدد` : "فلاتر مفعّلة"}
+                  {selectedColors.length > 0 ? `${selectedColors.length} لون محدد` : selectedSizes.length > 0 ? `${selectedSizes.length} مقاس محدد` : selectedBrands.length > 0 ? `${selectedBrands.length} براند محدد` : "فلاتر مفعّلة"}
                 </span>
               )}
             </div>
