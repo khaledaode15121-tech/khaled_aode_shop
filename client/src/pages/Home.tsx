@@ -5,7 +5,7 @@
  * Fonts: Cairo (headings) + Tajawal (body) + Space Grotesk (numbers)
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
@@ -459,6 +459,7 @@ function CatalogHero({
   onSearch: (value: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { data: categories = [] } = trpc.products.categories.useQuery();
   const { data: brands = [] } = trpc.products.brands.useQuery();
 
@@ -468,14 +469,20 @@ function CatalogHero({
     document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const openQuickSearch = () => {
+    document.getElementById("quick-search")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => searchInputRef.current?.focus(), 250);
+  };
+
   return (
     <section id="hero" className="bg-gradient-to-b from-slate-50 via-white to-white pt-24 pb-12 md:pt-28 md:pb-16">
       <div className="container">
         <div className="flex flex-col gap-5 rounded-[2rem] border border-white bg-white/90 p-4 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] backdrop-blur md:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-            <form onSubmit={submitSearch} className="flex min-h-14 flex-1 items-center overflow-hidden rounded-2xl border-2 border-gray-200 bg-white focus-within:border-blue-600">
+            <form id="quick-search" onSubmit={submitSearch} className="flex min-h-14 flex-1 items-center overflow-hidden rounded-2xl border-2 border-gray-200 bg-white transition-colors focus-within:border-blue-600 focus-within:shadow-lg focus-within:shadow-blue-500/10">
               <Search className="mx-4 h-5 w-5 shrink-0 text-blue-600" />
               <input
+                ref={searchInputRef}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="ابحث عن منتج أو برند..."
@@ -494,9 +501,17 @@ function CatalogHero({
 
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
             <aside className="order-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:order-1 lg:sticky lg:top-28 lg:w-60 lg:shrink-0">
-              <div className="flex items-center justify-between bg-gradient-to-l from-blue-700 to-blue-600 px-5 py-4 text-center font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>
+              <div className="flex items-center justify-between gap-3 bg-gradient-to-l from-blue-700 to-blue-600 px-4 py-3.5 text-center font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>
                 <span>البرندات</span>
-                <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-normal">تصفح سريع</span>
+                <button
+                  type="button"
+                  onClick={openQuickSearch}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-2.5 py-1.5 text-[11px] font-semibold transition hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/60"
+                  title="فتح البحث السريع"
+                >
+                  <Search className="h-3.5 w-3.5" />
+                  <span>بحث سريع</span>
+                </button>
               </div>
               <div className="max-h-64 overflow-y-auto p-2">
                 <button onClick={() => onSearch("")} className="w-full rounded-xl px-3 py-2 text-right text-sm font-semibold text-gray-700 transition hover:bg-blue-50 hover:text-blue-600" style={{ fontFamily: "'Cairo', sans-serif" }}>كل البرندات</button>
