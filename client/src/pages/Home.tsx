@@ -459,6 +459,7 @@ function CatalogHero({
   onSearch: (value: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  const [brandsOpen, setBrandsOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { data: categories = [] } = trpc.products.categories.useQuery();
   const { data: brands = [] } = trpc.products.brands.useQuery();
@@ -472,6 +473,12 @@ function CatalogHero({
   const openQuickSearch = () => {
     document.getElementById("quick-search")?.scrollIntoView({ behavior: "smooth", block: "center" });
     window.setTimeout(() => searchInputRef.current?.focus(), 250);
+  };
+
+  const selectBrand = (brandName: string) => {
+    setBrandsOpen(false);
+    onSearch(brandName);
+    document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -500,23 +507,60 @@ function CatalogHero({
           </div>
 
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
-            <aside className="order-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:order-1 lg:sticky lg:top-28 lg:w-60 lg:shrink-0">
-              <div className="flex items-center justify-between gap-3 bg-gradient-to-l from-blue-700 to-blue-600 px-4 py-3.5 text-center font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                <span>البرندات</span>
-                <button
-                  type="button"
-                  onClick={openQuickSearch}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-2.5 py-1.5 text-[11px] font-semibold transition hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/60"
-                  title="فتح البحث السريع"
+            <aside className="order-2 overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm lg:order-1 lg:sticky lg:top-28 lg:w-60 lg:shrink-0">
+              <div
+                className="relative"
+                onMouseEnter={() => setBrandsOpen(true)}
+                onMouseLeave={() => setBrandsOpen(false)}
+              >
+                <div className="flex items-center justify-between gap-3 rounded-t-2xl bg-gradient-to-l from-blue-700 to-blue-600 px-4 py-3.5 text-center font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  <button
+                    type="button"
+                    onClick={() => setBrandsOpen((open) => !open)}
+                    onFocus={() => setBrandsOpen(true)}
+                    aria-expanded={brandsOpen}
+                    aria-haspopup="true"
+                    className="inline-flex items-center gap-1.5 rounded-lg px-1 py-1 transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/60"
+                  >
+                    <span>البرندات</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${brandsOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={openQuickSearch}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-2.5 py-1.5 text-[11px] font-semibold transition hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/60"
+                    title="فتح البحث السريع"
+                  >
+                    <Search className="h-3.5 w-3.5" />
+                    <span>بحث سريع</span>
+                  </button>
+                </div>
+                <div
+                  className={`absolute right-0 top-full z-50 mt-2 w-64 origin-top-right rounded-2xl border border-slate-200 bg-white p-2 text-right shadow-2xl shadow-slate-900/15 transition-all duration-200 ${brandsOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0"}`}
+                  role="menu"
+                  aria-label="أشهر البرندات"
                 >
-                  <Search className="h-3.5 w-3.5" />
-                  <span>بحث سريع</span>
-                </button>
+                  <div className="px-3 py-2 text-xs font-bold text-slate-400" style={{ fontFamily: "'Cairo', sans-serif" }}>أشهر البرندات</div>
+                  <div className="grid grid-cols-2 gap-1">
+                    {brands.slice(0, 6).map((brand) => (
+                      <button
+                        key={brand.id}
+                        type="button"
+                        role="menuitem"
+                        onClick={() => selectBrand(brand.name)}
+                        className="flex min-w-0 items-center gap-2 rounded-xl px-2 py-2 text-right text-xs font-semibold text-slate-700 transition hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:outline-none"
+                      >
+                        {brand.logo ? <img src={brand.logo} alt="" className="h-5 w-5 shrink-0 rounded object-contain" /> : <span className="h-2 w-2 shrink-0 rounded-full bg-orange-500" />}
+                        <span className="truncate">{brand.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div className="max-h-64 overflow-y-auto p-2">
                 <button onClick={() => onSearch("")} className="w-full rounded-xl px-3 py-2 text-right text-sm font-semibold text-gray-700 transition hover:bg-blue-50 hover:text-blue-600" style={{ fontFamily: "'Cairo', sans-serif" }}>كل البرندات</button>
                 {brands.map((brand) => (
-                  <button key={brand.id} onClick={() => onSearch(brand.name)} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-right text-sm text-gray-600 transition hover:bg-blue-50 hover:text-blue-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  <button key={brand.id} onClick={() => selectBrand(brand.name)} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-right text-sm text-gray-600 transition hover:bg-blue-50 hover:text-blue-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     {brand.logo ? <img src={brand.logo} alt="" className="h-6 w-6 rounded object-contain" /> : <span className="h-2 w-2 rounded-full bg-orange-500" />}
                     <span>{brand.name}</span>
                   </button>
