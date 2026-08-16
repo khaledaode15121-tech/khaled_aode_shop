@@ -460,6 +460,7 @@ function CatalogHero({
 }) {
   const [query, setQuery] = useState("");
   const [brandsOpen, setBrandsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { data: categories = [] } = trpc.products.categories.useQuery();
   const { data: brands = [] } = trpc.products.brands.useQuery();
@@ -467,13 +468,21 @@ function CatalogHero({
   const submitSearch = (event: React.FormEvent) => {
     event.preventDefault();
     onSearch(query.trim());
+    setSearchOpen(false);
     document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const openQuickSearch = () => {
-    document.getElementById("quick-search")?.scrollIntoView({ behavior: "smooth", block: "center" });
-    window.setTimeout(() => searchInputRef.current?.focus(), 250);
-  };
+  const openQuickSearch = () => setSearchOpen(true);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSearchOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    window.setTimeout(() => searchInputRef.current?.focus(), 100);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [searchOpen]);
 
   const selectBrand = (brandName: string) => {
     setBrandsOpen(false);
@@ -590,6 +599,55 @@ function CatalogHero({
           </div>
         </div>
       </div>
+
+      {searchOpen && (
+        <div
+          className="fixed inset-0 z-[70] flex items-start justify-center bg-slate-950/55 px-4 pt-24 backdrop-blur-sm md:pt-32"
+          role="dialog"
+          aria-modal="true"
+          aria-label="البحث عن المنتجات"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setSearchOpen(false);
+          }}
+        >
+          <div className="w-full max-w-2xl animate-in fade-in slide-in-from-top-3 duration-200">
+            <div className="overflow-hidden rounded-3xl border border-white/70 bg-white shadow-2xl shadow-slate-950/25">
+              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                <div>
+                  <p className="text-xs font-semibold text-blue-600" style={{ fontFamily: "'Cairo', sans-serif" }}>بحث سريع</p>
+                  <h2 className="mt-1 text-lg font-black text-slate-900" style={{ fontFamily: "'Cairo', sans-serif" }}>ما الذي تبحث عنه؟</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(false)}
+                  className="rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  aria-label="إغلاق البحث"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <form onSubmit={submitSearch} className="p-5">
+                <div className="flex min-h-14 items-center overflow-hidden rounded-2xl border-2 border-slate-200 bg-slate-50 transition focus-within:border-blue-600 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-blue-500/10">
+                  <Search className="mx-4 h-5 w-5 shrink-0 text-blue-600" />
+                  <input
+                    ref={searchInputRef}
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="اكتب اسم المنتج أو البراند..."
+                    className="h-full min-w-0 flex-1 bg-transparent px-1 text-right text-sm text-slate-800 outline-none"
+                    style={{ fontFamily: "'Cairo', sans-serif" }}
+                    autoComplete="off"
+                  />
+                  <button type="submit" className="h-full bg-blue-600 px-6 font-bold text-white transition hover:bg-blue-700 active:scale-95" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    بحث
+                  </button>
+                </div>
+                <p className="mt-3 text-xs text-slate-400" style={{ fontFamily: "'Tajawal', sans-serif" }}>اضغط Enter لتنفيذ البحث أو Escape لإغلاق النافذة.</p>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
