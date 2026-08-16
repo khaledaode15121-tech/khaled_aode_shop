@@ -469,9 +469,9 @@ function CatalogHero({
   };
 
   return (
-    <section id="hero" className="bg-white pt-24 md:pt-28 pb-10">
+    <section id="hero" className="bg-gradient-to-b from-slate-50 via-white to-white pt-24 pb-12 md:pt-28 md:pb-16">
       <div className="container">
-        <div className="flex flex-col gap-5 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm md:p-6">
+        <div className="flex flex-col gap-5 rounded-[2rem] border border-white bg-white/90 p-4 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] backdrop-blur md:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
             <form onSubmit={submitSearch} className="flex min-h-14 flex-1 items-center overflow-hidden rounded-2xl border-2 border-gray-200 bg-white focus-within:border-blue-600">
               <Search className="mx-4 h-5 w-5 shrink-0 text-blue-600" />
@@ -492,9 +492,12 @@ function CatalogHero({
             </div>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
-            <aside className="order-2 overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 lg:order-1">
-              <div className="bg-blue-600 px-5 py-4 text-center font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>البرندات</div>
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
+            <aside className="order-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:order-1 lg:sticky lg:top-28 lg:w-60 lg:shrink-0">
+              <div className="flex items-center justify-between bg-gradient-to-l from-blue-700 to-blue-600 px-5 py-4 text-center font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <span>البرندات</span>
+                <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-normal">تصفح سريع</span>
+              </div>
               <div className="max-h-64 overflow-y-auto p-2">
                 <button onClick={() => onSearch("")} className="w-full rounded-xl px-3 py-2 text-right text-sm font-semibold text-gray-700 transition hover:bg-blue-50 hover:text-blue-600" style={{ fontFamily: "'Cairo', sans-serif" }}>كل البرندات</button>
                 {brands.map((brand) => (
@@ -506,7 +509,7 @@ function CatalogHero({
               </div>
             </aside>
 
-            <div className="order-1 grid min-h-[290px] gap-3 sm:grid-cols-2 lg:order-2 lg:grid-cols-[1.15fr_.85fr]">
+            <div className="order-1 grid min-h-[290px] min-w-0 flex-1 gap-3 sm:grid-cols-2 lg:order-2 lg:grid-cols-[1.15fr_.85fr]">
               <div className="relative overflow-hidden rounded-3xl bg-[#0D1B2A] p-7 text-white sm:col-span-2 lg:col-span-1">
                 <img src={HERO_IMG} alt="أحدث المنتجات" className="absolute inset-0 h-full w-full object-cover opacity-35" />
                 <div className="absolute inset-0 bg-gradient-to-l from-[#0D1B2A]/20 to-[#0D1B2A]/95" />
@@ -632,54 +635,17 @@ function HeroSection() {
   );
 }
 
-function BrandsMarquee() {
-  const { data: categories = [] } = trpc.products.categories.useQuery();
-
-  return (
-    <section className="bg-white border-y border-gray-100 py-5 overflow-hidden">
-      <div className="flex items-center gap-2 mb-2 container">
-        <span className="text-xs text-gray-400 whitespace-nowrap" style={{ fontFamily: "'Cairo', sans-serif" }}>
-          التصنيفات المتاحة:
-        </span>
-      </div>
-      <div className="relative">
-        <div className="flex animate-marquee gap-12 whitespace-nowrap">
-          {[...categories, ...categories].map((category, i) => (
-            <span
-              key={i}
-              className="text-gray-500 font-semibold text-sm hover:text-blue-600 transition-colors cursor-default"
-              style={{ fontFamily: "'Cairo', sans-serif" }}
-            >
-              {category}
-            </span>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function ProductsSection({ selectedCategory, searchQuery }: { selectedCategory?: string; searchQuery: string }) {
-  const [activeFilter, setActiveFilter] = useState("الكل");
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const searchResult = trpc.products.search.useQuery({ query: searchQuery || undefined, limit: 24 });
   const productList = trpc.products.list.useQuery(undefined, { enabled: !searchQuery });
   const products = searchQuery ? (searchResult.data ?? []) : (productList.data ?? []);
   const productsLoading = searchQuery ? searchResult.isLoading : productList.isLoading;
-  const { data: brands = [] } = trpc.products.brands.useQuery();
-  const filters = ["الكل", ...brands.map((brand) => brand.name), "عروض"];
-
   const filteredProducts = useMemo(() => {
-    let result = products;
-    if (activeFilter !== "الكل" && activeFilter !== "عروض") {
-      result = products.filter((product) => product.brand === activeFilter);
-    }
-    if (selectedCategory) {
-      result = result.filter((product) => product.category === selectedCategory);
-    }
-    return result;
-  }, [activeFilter, products, selectedCategory]);
+    if (!selectedCategory) return products;
+    return products.filter((product) => product.category === selectedCategory);
+  }, [products, selectedCategory]);
 
   const addToCartMutation = trpc.cart.add.useMutation({
     onSuccess: () => {
@@ -716,23 +682,6 @@ function ProductsSection({ selectedCategory, searchQuery }: { selectedCategory?:
             </h2>
           </div>
 
-          {/* Filters */}
-          <div className="flex gap-2 flex-wrap">
-            {filters.map((f) => (
-              <button
-                key={f}
-                onClick={() => setActiveFilter(f)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                  activeFilter === f
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-                style={{ fontFamily: "'Cairo', sans-serif" }}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -1392,7 +1341,6 @@ export default function Home() {
     <div className="min-h-screen" dir="rtl">
       <Navbar selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
       <CatalogHero selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} onSearch={setSearchQuery} />
-      <BrandsMarquee />
       <ProductsSection selectedCategory={selectedCategory} searchQuery={searchQuery} />
       <OffersSection />
       <FeaturesSection />
