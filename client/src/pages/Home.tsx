@@ -462,8 +462,14 @@ function CatalogHero({
   const [brandsOpen, setBrandsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [, navigate] = useLocation();
   const { data: categories = [] } = trpc.products.categories.useQuery();
   const { data: brands = [] } = trpc.products.brands.useQuery();
+  const liveQuery = query.trim();
+  const { data: suggestions = [], isFetching: suggestionsLoading } = trpc.products.search.useQuery(
+    { query: liveQuery, limit: 6 },
+    { enabled: searchOpen && liveQuery.length >= 2 }
+  );
 
   const submitSearch = (event: React.FormEvent) => {
     event.preventDefault();
@@ -488,6 +494,11 @@ function CatalogHero({
     setBrandsOpen(false);
     onSearch(brandName);
     document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const selectSuggestion = (product: { id: number }) => {
+    setSearchOpen(false);
+    navigate(`/product/${product.id}`);
   };
 
   return (
@@ -643,6 +654,40 @@ function CatalogHero({
                   </button>
                 </div>
                 <p className="mt-3 text-xs text-slate-400" style={{ fontFamily: "'Tajawal', sans-serif" }}>اضغط Enter لتنفيذ البحث أو Escape لإغلاق النافذة.</p>
+
+                {liveQuery.length >= 2 && (
+                  <div className="mt-4 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/70">
+                    <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                      <span className="text-xs font-bold text-slate-500" style={{ fontFamily: "'Cairo', sans-serif" }}>اقتراحات المنتجات</span>
+                      {suggestionsLoading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" aria-label="جارٍ البحث" />}
+                    </div>
+                    {suggestionsLoading ? (
+                      <div className="space-y-2 p-3">
+                        {[1, 2, 3].map((item) => <div key={item} className="h-14 animate-pulse rounded-xl bg-slate-200/70" />)}
+                      </div>
+                    ) : suggestions.length > 0 ? (
+                      <div className="divide-y divide-slate-100">
+                        {suggestions.map((product) => (
+                          <button
+                            key={product.id}
+                            type="button"
+                            onClick={() => selectSuggestion(product)}
+                            className="flex w-full items-center gap-3 px-4 py-3 text-right transition hover:bg-white focus:bg-white focus:outline-none"
+                          >
+                            <img src={product.image || "https://via.placeholder.com/80x80?text=Product"} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-sm font-bold text-slate-800" style={{ fontFamily: "'Cairo', sans-serif" }}>{product.name}</span>
+                              <span className="mt-1 block truncate text-xs text-blue-600" style={{ fontFamily: "'Tajawal', sans-serif" }}>{product.brand || "منتج متوفر"} · {Number(product.price).toLocaleString()} ر.س</span>
+                            </span>
+                            <ChevronLeft className="h-4 w-4 shrink-0 text-slate-300" />
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="px-4 py-5 text-center text-sm text-slate-400" style={{ fontFamily: "'Tajawal', sans-serif" }}>لم نعثر على منتجات مطابقة. جرّب كلمة أخرى.</p>
+                    )}
+                  </div>
+                )}
               </form>
             </div>
           </div>
